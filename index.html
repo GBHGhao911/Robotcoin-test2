@@ -262,8 +262,6 @@
                                 else if (enKey === "item") {
                                     console.log("物品字段原始值:", val, "类型:", typeof val, "是否数组:", Array.isArray(val));
 
-                                    debugger ;
-
                                     ds[enKey] = [];
                                     let items = [];
 
@@ -305,9 +303,9 @@
                             ds.path = String(fileName).replace(/\.yml$/i, '');
                             ds.id = String(idCounter++);
                             datasets.push(ds);
+                            
+                            debugger ;
                         }
-
-                        debugger ;
 
                         buildAllCheckboxGroups(datasets);
                         buildItemTree(datasets); // 构建物品树
