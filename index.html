@@ -276,19 +276,17 @@
                                     }
 
                                     items.forEach(itemObj => {
-                                        if (typeof itemObj === "object" && itemObj !== null) {
-                                            const levels = [];
-                                            for (let i = 1; i <= 5; i++) {
-                                                const key = "level" + i;
-                                                if (itemObj[key] && itemObj[key] !== "null") {
-                                                    levels.push(String(itemObj[key]).trim());
-                                                }
+                                        const levels = [];
+                                        for (let i = 1; i <= 5; i++) {
+                                            const key = "level" + i;
+                                            if (itemObj && itemObj[key] && itemObj[key] !== "null") {
+                                                levels.push(String(itemObj[key]).trim());
                                             }
-                                            if (levels.length > 0) {
-                                                ds[enKey].push(levels);
-                                            }
+                                        }
+                                        if (levels.length > 0) {
+                                            ds[enKey].push(levels);
                                         } else if (typeof itemObj === "string") {
-                                            // 兼容旧的路径字符串
+                                            // 兼容旧格式字符串路径
                                             ds[enKey].push(itemObj.trim().split('/'));
                                         }
                                     });
