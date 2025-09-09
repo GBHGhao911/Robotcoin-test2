@@ -317,28 +317,34 @@
                     }
                 }
 
-
-
-                
-
                 function buildAllCheckboxGroups(datasets) {
-                    filters.innerHTML = '';
+                    filterSection.innerHTML = '';
+
                     for (const [cnKey, enKey] of Object.entries(chineseToEnglishMapping)) {
-                        if (["name", "description", "path", "id"].includes(enKey)) continue;
-                        if (enKey === "item") {
-                            buildItemTree(filters, cnKey, datasets);
-                        } else {
-                            const valueSet = new Set();
-                            datasets.forEach(ds => {
-                                if (Array.isArray(ds[enKey])) ds[enKey].forEach(v => valueSet.add(String(v)));
-                                else if (ds[enKey] !== undefined && ds[enKey] !== null) {
-                                    valueSet.add(String(ds[enKey]));
+                        // 跳过不需要生成复选框的字段
+                        if (["name", "description", "path", "id", "item"].includes(enKey)) continue;
+
+                        const valueSet = new Set();
+
+                        // ✅ 改成 for 循环，确保稳定
+                        for (let i = 0; i < datasets.length; i++) {
+                            const ds = datasets[i];
+
+                            if (Array.isArray(ds[enKey])) {
+                                for (let j = 0; j < ds[enKey].length; j++) {
+                                    valueSet.add(String(ds[enKey][j]).trim());
                                 }
-                            });
-                            buildGroup(filters, cnKey, enKey, valueSet);
+                            } else if (ds[enKey] !== undefined && ds[enKey] !== null) {
+                                valueSet.add(String(ds[enKey]).trim());
+                            }
+                        }
+
+                        if (valueSet.size > 0) {
+                            buildGroup(filterSection, cnKey, enKey, valueSet);
                         }
                     }
                 }
+
 
                 function buildGroup(container, title, cssClass, valuesSet) {
                     const values = Array.from(valuesSet).sort();
