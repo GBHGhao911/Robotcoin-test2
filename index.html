@@ -258,40 +258,43 @@
                                 if (enKey === "description" && val !== undefined && val !== null) {
                                     ds[enKey] = String(val);
                                 } 
-                                // 物品处理（支持数组 / 对象 / 单值）
+                                // ✅ 物品处理
                                 else if (enKey === "item") {
-                                    console.log("物品字段原始值:", val, "类型:", typeof val, "是否数组:", Array.isArray(val));
-
                                     ds[enKey] = [];
-                                    let items = [];
 
+                                    // 保证 items 一定是数组
+                                    let items = [];
                                     if (Array.isArray(val)) {
-                                        items = val;
+                                        items = val.slice(); // 复制，确保是标准数组
                                     } else if (typeof val === "object" && val !== null) {
-                                        items = Object.values(val); // 数字键对象 → 数组
+                                        items = Object.values(val); // 对象转数组
                                     } else if (val) {
                                         items = [val];
                                     }
 
-                                    for (let idx = 0; idx < items.length; idx++) {
-                                        const itemObj = items[idx];
+                                    // 处理每个物品
+                                    for (let i = 0; i < items.length; i++) {
+                                        const itemObj = items[i];
                                         const levels = [];
 
-                                        for (let i = 1; i <= 5; i++) {
-                                            const key = "level" + i;
-                                            if (itemObj[key] && itemObj[key] !== "null") {
-                                                levels.push(String(itemObj[key]).trim());
+                                        if (typeof itemObj === "object" && itemObj !== null) {
+                                            for (let j = 1; j <= 5; j++) {
+                                                const key = "level" + j;
+                                                if (itemObj[key] && itemObj[key] !== "null") {
+                                                    levels.push(String(itemObj[key]).trim());
+                                                }
                                             }
+                                        } else if (typeof itemObj === "string") {
+                                            // 兼容旧格式 "food/bread"
+                                            levels.push(...itemObj.trim().split('/'));
                                         }
 
                                         if (levels.length > 0) {
                                             ds[enKey].push(levels);
                                         }
                                     }
-
-
                                 } 
-                                // 声音 / 触觉传感器保存为字符串
+                                // ✅ 声音/触觉传感器保存为字符串，避免 0 被忽略
                                 else if (enKey === "soundSensors" || enKey === "tactileSensors") {
                                     ds[enKey] = (val !== undefined && val !== null) ? String(val) : "0";
                                 } 
@@ -303,11 +306,10 @@
                             ds.path = String(fileName).replace(/\.yml$/i, '');
                             ds.id = String(idCounter++);
                             datasets.push(ds);
-                            debugger ;
                         }
 
                         buildAllCheckboxGroups(datasets);
-                        buildItemTree(datasets); // 构建物品树
+                        buildItemTree(datasets);
                         applyFilters();
                     } catch (err) {
                         filterError.textContent = '加载数据失败: ' + err.message;
@@ -315,6 +317,7 @@
                         console.error("加载数据失败:", err);
                     }
                 }
+
 
 
                 function buildAllCheckboxGroups(datasets) {
