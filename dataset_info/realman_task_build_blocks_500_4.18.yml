@@ -17,9 +17,22 @@
   - 堆叠
   - 移动
 物品:
-  level1: 玩具
-  level2: 积木
-  level3: 拱形积木
+- 物品名称: table
+  level1: furniture
+  level2: table
+  level3: null
+  level4: null
+  level5: null
+- 物品名称: bread
+  level1: food
+  level2: bread
+  level3: null
+  level4: null
+  level5: null
+- 物品名称: plate
+  level1: container
+  level2: plate
+  level3: null
   level4: null
   level5: null
 桌面高度: 77.2cm

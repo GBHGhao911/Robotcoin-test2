@@ -251,71 +251,36 @@
                             const yamlText = await res.text();
                             let raw = jsyamlLib.load(yamlText);
                             const ds = {};
-
                             for (const [cnKey, val] of Object.entries(raw || {})) {
                                 const enKey = chineseToEnglishMapping[cnKey] || cnKey;
-
                                 if (enKey === "description" && val !== undefined && val !== null) {
                                     ds[enKey] = String(val);
-                                } 
-                                // 物品处理（支持数组 / 对象 / 单值）
-                                else if (enKey === "item") {
-                                    console.log("物品字段原始值:", val, "类型:", typeof val, "是否数组:", Array.isArray(val));
-
-                                    ds[enKey] = [];
-                                    let items = [];
-
-                                    if (Array.isArray(val)) {
-                                        items = val;
-                                    } else if (typeof val === "object" && val !== null) {
-                                        items = Object.values(val); // 数字键对象 → 数组
-                                    } else if (val) {
-                                        items = [val];
+                                } else if (enKey === "item" && typeof val === "object") {
+                                    ds[enKey] = Object.values(val).filter(v => v && v !== "null");
+                                } else {
+                                    // 特殊处理：声音传感器 & 触觉传感器，存成字符串，避免 0 被忽略
+                                    if (enKey === "soundSensors" || enKey === "tactileSensors") {
+                                        ds[enKey] = String(val);
+                                    } else {
+                                        ds[enKey] = val;
                                     }
-
-                                    items.forEach(itemObj => {
-                                        if (typeof itemObj === "object" && itemObj !== null) {
-                                            const levels = [];
-                                            for (let i = 1; i <= 5; i++) {
-                                                const key = "level" + i;
-                                                if (itemObj[key] && itemObj[key] !== "null") {
-                                                    levels.push(String(itemObj[key]).trim());
-                                                }
-                                            }
-                                            if (levels.length > 0) {
-                                                ds[enKey].push(levels);
-                                            }
-                                        } else if (typeof itemObj === "string") {
-                                            // 兼容旧的路径字符串
-                                            ds[enKey].push(itemObj.trim().split('/'));
-                                        }
-                                    });
-                                } 
-                                // 声音 / 触觉传感器保存为字符串
-                                else if (enKey === "soundSensors" || enKey === "tactileSensors") {
-                                    ds[enKey] = (val !== undefined && val !== null) ? String(val) : "0";
-                                } 
-                                else {
-                                    ds[enKey] = val;
                                 }
                             }
-
                             ds.path = String(fileName).replace(/\.yml$/i, '');
                             ds.id = String(idCounter++);
+
+                            debugger ;
+
                             datasets.push(ds);
                         }
 
                         buildAllCheckboxGroups(datasets);
-                        buildItemTree(datasets); // 构建物品树
                         applyFilters();
                     } catch (err) {
                         filterError.textContent = '加载数据失败: ' + err.message;
                         filterError.style.display = 'block';
-                        console.error("加载数据失败:", err);
                     }
                 }
-
-
 
                 
 
@@ -369,75 +334,54 @@
                     });
                 }
 
-                function buildItemTree(datasets) {
+                function buildItemTree(container, title, datasets) {
+                    const root = document.createElement('div');
+                    root.innerHTML = '<h5 class="mb-1">' + escapeHtml(title) + '</h5>';
                     const tree = {};
 
-                    // 构建分类树
                     datasets.forEach(ds => {
                         if (Array.isArray(ds.item)) {
-                            ds.item.forEach(path => {
-                                let node = tree;
-
-                                if (Array.isArray(path)) {
-                                    // 新结构: ["food","bread"]
-                                    path.forEach(level => {
-                                        if (!node[level]) node[level] = {};
-                                        node = node[level];
-                                    });
-                                } else if (typeof path === "string") {
-                                    // 旧结构: "food/bread"
-                                    path.trim().split('/').forEach(level => {
-                                        if (!node[level]) node[level] = {};
-                                        node = node[level];
-                                    });
-                                }
+                            let node = tree;
+                            ds.item.forEach(it => {
+                                if (!node[it]) node[it] = {};
+                                node = node[it];
                             });
                         }
                     });
 
-                    // 渲染分类树
                     function renderNode(node, prefix) {
-                        let html = "<ul class='item-tree'>";
-                        Object.keys(node).sort().forEach((key, i) => {
+                        let html = '<ul>';
+                        Object.keys(node).forEach((key, i) => {
                             const id = prefix + '-' + i;
-                            const safeKey = escapeHtml(key);
+                            const hasChild = Object.keys(node[key]).length > 0;
                             html += `<li>
-                                        <label>
-                                        <input type="checkbox" class="item-checkbox" data-field="item" id="${id}" value="${safeKey}">
-                                        ${safeKey} 
-                                        <small class="text-muted">(<span id="${id}-count">0</span>)</small>
-                                        </label>`;
-                            html += renderNode(node[key], id);
+                                <label class="checkbox-container">
+                                <input type="checkbox" class="item-checkbox" data-field="item" id="${id}" value="${escapeHtml(key)}">
+                                ${escapeHtml(key)} <small class="text-muted">(<span id="${id}-count">0</span>)</small>
+                                </label>`;
+                            if (hasChild) {
+                                html += `<span class="tree-toggle">▶</span>
+                                <div class="nested">${renderNode(node[key], id)}</div>`;
+                            }
                             html += `</li>`;
                         });
-                        html += "</ul>";
+                        html += '</ul>';
                         return html;
                     }
 
-                    const html = '<h5 class="mb-1">物品</h5>' +
-                                '<div class="checkbox-container"><label><input type="checkbox" id="item-all-checkbox" checked> 全部</label></div>' +
-                                renderNode(tree, "item");
+                    root.innerHTML += renderNode(tree, 'item');
+                    container.appendChild(root);
 
-                    const block = document.createElement('div');
-                    block.innerHTML = html;
-                    itemFilter.appendChild(block);
-
-                    // 绑定全选/取消全选事件
-                    block.addEventListener('change', (e) => {
-                        const allBox = document.getElementById("item-all-checkbox");
-                        const children = Array.from(block.querySelectorAll('.item-checkbox'));
-
-                        if (e.target === allBox) {
-                            if (allBox.checked) children.forEach(cb => cb.checked = false);
-                        } else if (e.target.classList.contains("item-checkbox")) {
-                            const anyChecked = children.some(cb => cb.checked);
-                            allBox.checked = !anyChecked;
+                    root.addEventListener('click', (e) => {
+                        if (e.target.classList.contains('tree-toggle')) {
+                            const li = e.target.closest('li');
+                            li.classList.toggle('expanded');
+                            e.target.textContent = li.classList.contains('expanded') ? '▼' : '▶';
                         }
-                        applyFilters();
                     });
+
+                    root.addEventListener('change', () => applyFilters());
                 }
-
-
 
                 function applyFilters() {
 

@@ -17,9 +17,22 @@
 - 堆叠
 - 移动
 物品:
-  level1: 容器
-  level2: 篮子
-  level3: 黑色篮子
+- 物品名称: table
+  level1: furniture
+  level2: table
+  level3: null
+  level4: null
+  level5: null
+- 物品名称: bowl
+  level1: container
+  level2: bowl
+  level3: null
+  level4: null
+  level5: null
+- 物品名称: shelf
+  level1: furniture
+  level2: shelf
+  level3: null
   level4: null
   level5: null
 桌面高度: 77.2cm
