@@ -13,7 +13,7 @@ objects:
 - object_name: table
   level1: furniture
   level2: table
-  level3: test
+  level3: null
   level4: null
   level5: null
 - object_name: apple
