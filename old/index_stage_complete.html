@@ -217,20 +217,19 @@
                 const jsyamlLib = window.jsyaml;
 
                 const chineseToEnglishMapping = {
-                    "dataset_name": "name",
-                    "task_descriptions": "description",
-                    "scene_type": "scene",
-                    "device_model": "robot",
-                    "end_effector_type": "end",
-                    //"相机数量": "cameraCount",
-                    //"相机类型": "cameraType",
-                    //"声音传感器数量": "soundSensors",
-                    //"触觉传感器数量": "tactileSensors",
-                    "atomic_actions": "action",
-                    "objects": "item",
-                    "operation_platform_height": "tableHeight",
-                    //"机器人高度": "robotHeight",
-                    "dataset_uuid": "id"
+                    "任务内容": "name",
+                    "描述": "description",
+                    "场景类型": "scene",
+                    "采集本体": "robot",
+                    "末端类型": "end",
+                    "相机数量": "cameraCount",
+                    "相机类型": "cameraType",
+                    "声音传感器数量": "soundSensors",
+                    "触觉传感器数量": "tactileSensors",
+                    "原子动作": "action",
+                    "物品": "item",
+                    "桌面高度": "tableHeight",
+                    "机器人高度": "robotHeight"
                 };
 
                 function escapeHtml(str) {
@@ -271,7 +270,7 @@
                                 }
                             }
                             ds.path = String(fileName).replace(/\.yml$/i, '');
-                            //ds.id = String(idCounter++);
+                            ds.id = String(idCounter++);
 
                             datasets.push(ds);
                         }
