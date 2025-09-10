@@ -122,16 +122,14 @@
             /* 自动换行 */
             word-break: break-word;
             /* 避免长单词溢出 */
-            scrollbar-width: thin;
-            /* 精简滚动条 */
+            scrollbar-width: thin;  /* 精简滚动条 */
         }
 
         .video-overlay-content::-webkit-scrollbar {
             width: 6px;
         }
-
         .video-overlay-content::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255,255,255,0.6);
             border-radius: 3px;
         }
 
@@ -390,22 +388,19 @@
                         }
                     });
 
-                    function renderNode(node, prefix, level = 0) {
+                    function renderNode(node, prefix) {
                         let html = '<ul>';
                         Object.keys(node).forEach((key, i) => {
                             const id = prefix + '-' + i;
                             const hasChild = Object.keys(node[key]).length > 0;
-
-                            const prefixStr = ' ' + '-'.repeat(level);
-
                             html += `<li>
                                 <label class="checkbox-container">
                                 <input type="checkbox" class="item-checkbox" data-field="item" id="${id}" value="${escapeHtml(key)}">
-                                ${prefixStr} ${escapeHtml(key)} <small class="text-muted">(<span id="${id}-count">0</span>)</small>
+                                ${escapeHtml(key)} <small class="text-muted">(<span id="${id}-count">0</span>)</small>
                                 </label>`;
                             if (hasChild) {
                                 html += `<span class="tree-toggle">▶</span>
-                                <div class="nested">${renderNode(node[key], id, level + 1)}</div>`;
+                                <div class="nested">${renderNode(node[key], id)}</div>`;
                             }
                             html += `</li>`;
                         });
@@ -426,7 +421,6 @@
 
                     root.addEventListener('change', () => applyFilters());
                 }
-
 
                 function applyFilters() {
                     selectedDatasets.clear();
