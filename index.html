@@ -100,6 +100,19 @@
             padding: 5px;
             z-index: 10;
             pointer-events: none;
+
+            /* 保持居中 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;   /* 垂直居中 */
+            align-items: center;       /* 水平居中 */
+            text-align: center;
+
+            /* 处理长内容 */
+            overflow-y: auto;          /* 超出时滚动 */
+            white-space: normal;       /* 自动换行 */
+            word-break: break-word;    /* 避免长单词溢出 */
+
         }
 
         .video-card:hover .video-overlay {
