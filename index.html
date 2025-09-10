@@ -391,6 +391,7 @@
                         }
                     });
 
+
                     // 渲染节点
                     function renderNode(node, prefix, level = 0) {
                         let html = '<ul>';
@@ -407,14 +408,10 @@
                                 ${prefixStr} ${escapeHtml(key)} <small class="text-muted">(<span id="${id}-count">0</span>)</small>
                                 </label>`;
 
-                            // 所有 level >= 1 的子节点默认折叠
-                            if (hasChild || level < 1) {
-                                const expanded = (level < 1); // 仅 level0 默认展开
-                                const toggleIcon = expanded ? '▼' : '▶';
-                                const nestedStyle = expanded ? 'style="display:block;"' : 'style="display:none;"';
-
-                                html += `<span class="tree-toggle">${toggleIcon}</span>
-                                <div class="nested" ${nestedStyle}>${renderNode(node[key], id, level + 1)}</div>`;
+                            if (hasChild) {
+                                // 默认折叠
+                                html += `<span class="tree-toggle">▶</span>
+                                <div class="nested" style="display:none;">${renderNode(node[key], id, level + 1)}</div>`;
                             }
 
                             html += `</li>`;
@@ -442,6 +439,7 @@
 
                     root.addEventListener('change', () => applyFilters());
                 }
+
 
 
 
