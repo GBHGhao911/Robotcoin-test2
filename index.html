@@ -378,6 +378,7 @@
                     root.innerHTML = '<h5 class="mb-1">' + escapeHtml(title) + '</h5>';
                     const tree = {};
 
+                    // 构建物品树
                     datasets.forEach(ds => {
                         if (Array.isArray(ds.item)) {
                             ds.item.forEach(path => {
@@ -390,12 +391,14 @@
                         }
                     });
 
+                    // 渲染节点，带缩进和展开逻辑
                     function renderNode(node, prefix, level = 0) {
                         let html = '<ul>';
                         Object.keys(node).forEach((key, i) => {
                             const id = prefix + '-' + i;
                             const hasChild = Object.keys(node[key]).length > 0;
 
+                            // 用 " -" 表示层级缩进
                             const prefixStr = ' ' + '-'.repeat(level);
 
                             html += `<li>
@@ -403,10 +406,17 @@
                                 <input type="checkbox" class="item-checkbox" data-field="item" id="${id}" value="${escapeHtml(key)}">
                                 ${prefixStr} ${escapeHtml(key)} <small class="text-muted">(<span id="${id}-count">0</span>)</small>
                                 </label>`;
+
                             if (hasChild) {
-                                html += `<span class="tree-toggle">▶</span>
-                                <div class="nested">${renderNode(node[key], id, level + 1)}</div>`;
+                                // level1 默认展开，其余折叠
+                                const expanded = (level < 1); // 0 展开，1+ 折叠
+                                const toggleIcon = expanded ? '▼' : '▶';
+                                const nestedStyle = expanded ? 'style="display:block;"' : '';
+
+                                html += `<span class="tree-toggle">${toggleIcon}</span>
+                                <div class="nested" ${nestedStyle}>${renderNode(node[key], id, level + 1)}</div>`;
                             }
+
                             html += `</li>`;
                         });
                         html += '</ul>';
@@ -416,16 +426,23 @@
                     root.innerHTML += renderNode(tree, 'item');
                     container.appendChild(root);
 
+                    // 展开/收起逻辑
                     root.addEventListener('click', (e) => {
                         if (e.target.classList.contains('tree-toggle')) {
                             const li = e.target.closest('li');
                             li.classList.toggle('expanded');
                             e.target.textContent = li.classList.contains('expanded') ? '▼' : '▶';
+
+                            const nested = li.querySelector('.nested');
+                            if (nested) {
+                                nested.style.display = li.classList.contains('expanded') ? 'block' : 'none';
+                            }
                         }
                     });
 
                     root.addEventListener('change', () => applyFilters());
                 }
+
 
 
                 function applyFilters() {
