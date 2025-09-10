@@ -275,7 +275,7 @@
                             datasets.push(ds);
                         }
 
-                        debugger ;
+                        debugger;
 
                         buildAllCheckboxGroups(datasets);
                         applyFilters();
@@ -390,21 +390,13 @@
                 }
 
                 function applyFilters() {
-
-                    console.log("当前映射表:", chineseToEnglishMapping);
-                    console.log("某个数据集:", currentDatasets[0]);
-
-
                     selectedDatasets.clear();
                     const q = (searchBox && searchBox.value) ? String(searchBox.value).trim().toLowerCase() : '';
 
                     const activeFilters = {};
                     for (const [cnKey, enKey] of Object.entries(chineseToEnglishMapping)) {
-
-                        console.log("正在统计字段:", enKey);
-
-
                         if (["name", "description", "path", "id"].includes(enKey)) continue;
+
                         if (enKey === "item") {
                             const checked = Array.from(document.querySelectorAll('.item-checkbox:checked')).map(cb => cb.value);
                             if (checked.length > 0) activeFilters[enKey] = checked;
@@ -417,13 +409,20 @@
                         }
                     }
 
+                    // 修改后的过滤逻辑
                     currentDatasets = datasets.filter(ds => {
                         if (q) {
                             const name = String(ds.name || ds.path || '').toLowerCase();
                             if (!name.includes(q)) return false;
                         }
                         for (const [key, vals] of Object.entries(activeFilters)) {
-                            if (Array.isArray(ds[key])) {
+                            if (key === "item" && Array.isArray(ds.item)) {
+                                // 检查每条路径里是否包含选中的值
+                                const match = ds.item.some(path =>
+                                    path.some(level => vals.includes(level))
+                                );
+                                if (!match) return false;
+                            } else if (Array.isArray(ds[key])) {
                                 if (!ds[key].some(v => vals.includes(String(v)))) return false;
                             } else if (ds[key] !== undefined && ds[key] !== null) {
                                 if (!vals.includes(String(ds[key]))) return false;
@@ -434,13 +433,19 @@
                         return true;
                     });
 
-                    debugger;
-                    // 修复统计 key 的类型问题（保证数字 0 也能统计到）
+                    // 重新统计数量
                     for (const [cnKey, enKey] of Object.entries(chineseToEnglishMapping)) {
                         if (["name", "description", "path", "id"].includes(enKey)) continue;
                         const counts = {};
                         currentDatasets.forEach(ds => {
-                            if (Array.isArray(ds[enKey])) {
+                            if (enKey === "item" && Array.isArray(ds.item)) {
+                                ds.item.forEach(path => {
+                                    path.forEach(level => {
+                                        const key = String(level).trim();
+                                        counts[key] = (counts[key] || 0) + 1;
+                                    });
+                                });
+                            } else if (Array.isArray(ds[enKey])) {
                                 ds[enKey].forEach(v => {
                                     const key = String(v).trim();
                                     counts[key] = (counts[key] || 0) + 1;
@@ -462,11 +467,11 @@
                         }
                     }
 
-
                     totalPages = Math.max(1, Math.ceil(currentDatasets.length / itemsPerPage));
                     currentPage = 1;
                     renderVideos();
                 }
+
 
 
                 function renderVideos() {
