@@ -97,9 +97,9 @@
             text-align: center;
             align-items: center;
             font-size: 0.8rem;
-            padding: 8px;
+            padding: 5px;
             z-index: 10;
-            pointer-events: none;
+            /* pointer-events: none; */
 
 
             /* 父容器：保持居中 */
@@ -109,6 +109,8 @@
             align-items: center;
             /* 水平居中 */
             text-align: center;
+
+            pointer-events: auto;
         }
 
         /* 子容器：可滚动文本区域 */
@@ -121,6 +123,15 @@
             /* 自动换行 */
             word-break: break-word;
             /* 避免长单词溢出 */
+            scrollbar-width: thin;  /* 精简滚动条 */
+        }
+
+        .video-overlay-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .video-overlay-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.6);
+            border-radius: 3px;
         }
 
 
