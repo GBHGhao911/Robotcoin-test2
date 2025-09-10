@@ -409,7 +409,7 @@
                         }
                     }
 
-                    // 修改后的过滤逻辑
+                    // 数据集过滤逻辑
                     currentDatasets = datasets.filter(ds => {
                         if (q) {
                             const name = String(ds.name || ds.path || '').toLowerCase();
@@ -417,7 +417,7 @@
                         }
                         for (const [key, vals] of Object.entries(activeFilters)) {
                             if (key === "item" && Array.isArray(ds.item)) {
-                                // 检查每条路径里是否包含选中的值
+                                // 检查路径里是否包含被选中的任意值
                                 const match = ds.item.some(path =>
                                     path.some(level => vals.includes(level))
                                 );
@@ -433,22 +433,30 @@
                         return true;
                     });
 
-                    // 重新统计数量
+                    // 数量统计（避免重复统计同一数据集的同一标签）
                     for (const [cnKey, enKey] of Object.entries(chineseToEnglishMapping)) {
                         if (["name", "description", "path", "id"].includes(enKey)) continue;
                         const counts = {};
                         currentDatasets.forEach(ds => {
                             if (enKey === "item" && Array.isArray(ds.item)) {
+                                const seen = new Set(); // 本数据集已统计过的标签
                                 ds.item.forEach(path => {
                                     path.forEach(level => {
                                         const key = String(level).trim();
-                                        counts[key] = (counts[key] || 0) + 1;
+                                        if (!seen.has(key)) {
+                                            counts[key] = (counts[key] || 0) + 1;
+                                            seen.add(key);
+                                        }
                                     });
                                 });
                             } else if (Array.isArray(ds[enKey])) {
+                                const seen = new Set();
                                 ds[enKey].forEach(v => {
                                     const key = String(v).trim();
-                                    counts[key] = (counts[key] || 0) + 1;
+                                    if (!seen.has(key)) {
+                                        counts[key] = (counts[key] || 0) + 1;
+                                        seen.add(key);
+                                    }
                                 });
                             } else if (ds[enKey] !== undefined && ds[enKey] !== null) {
                                 const key = String(ds[enKey]).trim();
@@ -471,6 +479,7 @@
                     currentPage = 1;
                     renderVideos();
                 }
+
 
 
 
