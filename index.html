@@ -391,7 +391,7 @@
                         }
                     });
 
-                    // 渲染节点，带缩进和展开逻辑
+                    // 渲染节点
                     function renderNode(node, prefix, level = 0) {
                         let html = '<ul>';
                         Object.keys(node).forEach((key, i) => {
@@ -407,11 +407,11 @@
                                 ${prefixStr} ${escapeHtml(key)} <small class="text-muted">(<span id="${id}-count">0</span>)</small>
                                 </label>`;
 
-                            if (hasChild) {
-                                // level1 默认展开，其余折叠
-                                const expanded = (level < 1); // 0 展开，1+ 折叠
+                            // 所有 level >= 1 的子节点默认折叠
+                            if (hasChild || level < 1) {
+                                const expanded = (level < 1); // 仅 level0 默认展开
                                 const toggleIcon = expanded ? '▼' : '▶';
-                                const nestedStyle = expanded ? 'style="display:block;"' : '';
+                                const nestedStyle = expanded ? 'style="display:block;"' : 'style="display:none;"';
 
                                 html += `<span class="tree-toggle">${toggleIcon}</span>
                                 <div class="nested" ${nestedStyle}>${renderNode(node[key], id, level + 1)}</div>`;
@@ -442,6 +442,7 @@
 
                     root.addEventListener('change', () => applyFilters());
                 }
+
 
 
 
